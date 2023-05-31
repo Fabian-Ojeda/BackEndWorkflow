@@ -8,4 +8,5 @@ public class InfoNodoDTO {
     public String id;
     public String text;
     public String color;
+    public String estado;
 }

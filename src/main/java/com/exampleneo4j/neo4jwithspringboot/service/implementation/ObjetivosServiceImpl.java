@@ -32,7 +32,7 @@ public class ObjetivosServiceImpl implements ObjetivosService {
         List<InfoNodoDTO> listNodos = new ArrayList<>();
         List<ObjetivoNode> objetivoNodes = objetivoRepository.objetivosPorCreador(personaId);
         for (ObjetivoNode objetivoIterator : objetivoNodes) {
-            listNodos.add(new InfoNodoDTO(""+objetivoIterator.getId(), objetivoIterator.getNombre(), "lightblue"));
+            listNodos.add(new InfoNodoDTO(""+objetivoIterator.getId(), objetivoIterator.getNombre(), "lightblue", objetivoIterator.getEstado()));
         }
         infoPersonaNodosDTO.setNodos(listNodos);
         return infoPersonaNodosDTO;

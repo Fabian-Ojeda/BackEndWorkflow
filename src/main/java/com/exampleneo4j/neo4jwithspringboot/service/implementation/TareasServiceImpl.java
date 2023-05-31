@@ -30,14 +30,14 @@ public class TareasServiceImpl implements TareasService {
         List<InfoRelacionDTO> relations = new ArrayList<>();
 
         Optional<ObjetivoNode> objetivo = objetivoRepository.findById(objetivoId);
-        nodes.add(new InfoNodoDTO(""+objetivo.get().getId(), objetivo.get().getNombre(), "yellow"));
+        nodes.add(new InfoNodoDTO(""+objetivo.get().getId(), objetivo.get().getNombre(), "yellow", null));
         TareaNode tareaInicial = tareaRepository.tareaInicialByObjetivoId(objetivoId);
         Optional<TareaNode> tareaInico = tareaRepository.findById(tareaInicial.getId());
         TareaNode tareaActual = tareaInico.get();
 
         int indicator = 0;
         while (indicator!=1){
-            nodes.add(new InfoNodoDTO(""+tareaActual.getId(), tareaActual.getNombre(), "lightgreen"));
+            nodes.add(new InfoNodoDTO(""+tareaActual.getId(), tareaActual.getNombre(), "lightgreen", tareaActual.getEstado()));
             if(tareaActual.getTareasContigua().size()!=0){
                 relations.add(new InfoRelacionDTO(tareaActual.getId(), ""+tareaActual.getId(), ""+tareaActual.getTareasContigua().get(0).getId(), "b", "t"));
                 tareaActual= tareaActual.getTareasContigua().get(0);
