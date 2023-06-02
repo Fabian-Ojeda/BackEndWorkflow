@@ -63,7 +63,7 @@ public class PersonaServiceImpl implements PersonaService {
         tarea.setEstado(tareaCreacionDTO.getEstado());
         tarea.setFecha_creacion(LocalDate.now());
         tareaRepository.save(tarea);
-        //personaFinded.getTareasAsociadas().add(tarea);
+        personaFinded.getTareasAsociadas().add(tarea);
         personaRepository.save(personaFinded);
         return "Asignada :)";
     }

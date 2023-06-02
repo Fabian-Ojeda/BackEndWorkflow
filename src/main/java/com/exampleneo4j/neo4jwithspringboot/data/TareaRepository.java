@@ -24,6 +24,12 @@ public interface TareaRepository extends Neo4jRepository<TareaNode, Long> {
     @Query("MATCH (t:Tarea) WHERE ID(t) = $tareaId DETACH DELETE t")
     void borrarTarea(@Param("tareaId") Long tareaId);
 
+    @Query("MATCH (p:Person)-[:REALIZA]->(t:Tarea)"+
+            " MATCH (o:Objetivo)-[:INCLUYE]->(t)"+
+            " WHERE ID(p) = $realizadorId AND ID(o) = $objetivoId"+
+            " RETURN t")
+    List<TareaNode>  tareasByRealizadorIdAndObjetivoID(@Param("realizadorId") Long realizadorId,
+                                                       @Param("objetivoId") Long objetivoId);
 //    @Query("MATCH (o:Objetivo)-[:INCLUYE]->(t:Tarea) WHERE ID(o) = $objetivoId WITH t ORDER BY NOT EXISTS(()-[:CONTINUA]->(t)) DESC RETURN COLLECT(t)")
 //    List<TareaNode>  tareaByObjetivoId(@Param("objetivoId") Long objetivoId);
 }

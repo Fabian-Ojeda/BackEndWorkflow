@@ -11,4 +11,5 @@ public class InfoRelacionDTO {
     public String to;
     public String fromPort;
     public String toPort;
+    public String text;
 }

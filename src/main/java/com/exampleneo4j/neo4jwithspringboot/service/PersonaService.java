@@ -9,4 +9,5 @@ public interface PersonaService {
     String crearPersona(PersonaDTO personaDTO);
     String asociarTareaPersona(TareaCreacionDTO tareaCreacionDTO);
     String eliminarPersona(String nombre);
+
 }

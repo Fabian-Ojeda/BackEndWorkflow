@@ -1,9 +1,11 @@
 package com.exampleneo4j.neo4jwithspringboot.service.implementation;
 
 import com.exampleneo4j.neo4jwithspringboot.data.ObjetivoRepository;
+import com.exampleneo4j.neo4jwithspringboot.data.PersonaRepository;
 import com.exampleneo4j.neo4jwithspringboot.data.TareaRepository;
 import com.exampleneo4j.neo4jwithspringboot.dto.*;
 import com.exampleneo4j.neo4jwithspringboot.nodos.ObjetivoNode;
+import com.exampleneo4j.neo4jwithspringboot.nodos.PersonaNode;
 import com.exampleneo4j.neo4jwithspringboot.nodos.TareaNode;
 import com.exampleneo4j.neo4jwithspringboot.service.TareasService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ public class TareasServiceImpl implements TareasService {
     TareaRepository tareaRepository;
 
     @Autowired
+    PersonaRepository personaRepository;
+
+    @Autowired
     ObjetivoRepository objetivoRepository;
 
     @Override
@@ -28,9 +33,23 @@ public class TareasServiceImpl implements TareasService {
         InfoGrafoDTO infoGrafoDTO = new InfoGrafoDTO();
         List<InfoNodoDTO> nodes = new ArrayList<>();
         List<InfoRelacionDTO> relations = new ArrayList<>();
+        //----------------------------------Se consultan los empleados-------------------------//
 
-        Optional<ObjetivoNode> objetivo = objetivoRepository.findById(objetivoId);
-        nodes.add(new InfoNodoDTO(""+objetivo.get().getId(), objetivo.get().getNombre(), "yellow", null));
+        //primero se busca el jefe que creo el objetivo
+        PersonaNode jefe = personaRepository.consultarCreadorObjetivo(objetivoId);
+        List<PersonaNode> subordinados = personaRepository.consultarSubordinadosByJefeId(jefe.getId());
+        for (PersonaNode subordinado:subordinados) {
+            nodes.add(new InfoNodoDTO(""+subordinado.getId(), subordinado.getNombres()+subordinado.getApellidos()
+                    , "lightpink", null));
+            //consultamos las tareas que hace la persona
+            List<TareaNode> tareasAsociadas = tareaRepository.tareasByRealizadorIdAndObjetivoID(subordinado.getId(), objetivoId);
+            for (TareaNode tareaSubordinado: tareasAsociadas) {
+//                relations.add(new InfoRelacionDTO(subordinado.getId()+100, ""+subordinado.getId(),
+//                ""+tareaSubordinado.getId(), "b", "t", "Realiza"));
+            }
+        }
+
+
         TareaNode tareaInicial = tareaRepository.tareaInicialByObjetivoId(objetivoId);
         Optional<TareaNode> tareaInico = tareaRepository.findById(tareaInicial.getId());
         TareaNode tareaActual = tareaInico.get();
@@ -39,7 +58,7 @@ public class TareasServiceImpl implements TareasService {
         while (indicator!=1){
             nodes.add(new InfoNodoDTO(""+tareaActual.getId(), tareaActual.getNombre(), "lightgreen", tareaActual.getEstado()));
             if(tareaActual.getTareasContigua().size()!=0){
-                relations.add(new InfoRelacionDTO(tareaActual.getId(), ""+tareaActual.getId(), ""+tareaActual.getTareasContigua().get(0).getId(), "b", "t"));
+                relations.add(new InfoRelacionDTO(tareaActual.getId(), ""+tareaActual.getId(), ""+tareaActual.getTareasContigua().get(0).getId(), "b", "t", "continua"));
                 tareaActual= tareaActual.getTareasContigua().get(0);
             }else{
                 indicator = 1;

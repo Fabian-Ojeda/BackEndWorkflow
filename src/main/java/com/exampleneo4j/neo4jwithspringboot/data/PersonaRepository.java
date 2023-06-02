@@ -13,5 +13,10 @@ public interface PersonaRepository extends Neo4jRepository<PersonaNode, Long> {
     PersonaNode findByNombres(String nombres);
     @Query("MATCH (p:Person)-[r]-() WHERE ID(p) = $id DELETE p, r")
     void borrarPersonaConRelacionesPorId(@Param("id") Long id);
+    @Query("MATCH (p:Person )-[:CREA]->(o:Objetivo) WHERE ID(o) = $objetivoId RETURN p")
+    PersonaNode consultarCreadorObjetivo(@Param("objetivoId") Long objetivoId);
+
+    @Query("MATCH (j:Person)-[:LIDERA]->(s:Person) WHERE ID(j) = $jefeId RETURN s")
+    List<PersonaNode> consultarSubordinadosByJefeId(@Param("jefeId") Long jefeId);
 
 }
