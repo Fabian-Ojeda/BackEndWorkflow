@@ -33,22 +33,24 @@ public class TareasServiceImpl implements TareasService {
         InfoGrafoDTO infoGrafoDTO = new InfoGrafoDTO();
         List<InfoNodoDTO> nodes = new ArrayList<>();
         List<InfoRelacionDTO> relations = new ArrayList<>();
+
         //----------------------------------Se consultan los empleados-------------------------//
 
         //primero se busca el jefe que creo el objetivo
         PersonaNode jefe = personaRepository.consultarCreadorObjetivo(objetivoId);
         List<PersonaNode> subordinados = personaRepository.consultarSubordinadosByJefeId(jefe.getId());
+        Long iterator = 100L;
         for (PersonaNode subordinado:subordinados) {
             nodes.add(new InfoNodoDTO(""+subordinado.getId(), subordinado.getNombres()+subordinado.getApellidos()
                     , "lightpink", null));
             //consultamos las tareas que hace la persona
             List<TareaNode> tareasAsociadas = tareaRepository.tareasByRealizadorIdAndObjetivoID(subordinado.getId(), objetivoId);
             for (TareaNode tareaSubordinado: tareasAsociadas) {
-//                relations.add(new InfoRelacionDTO(subordinado.getId()+100, ""+subordinado.getId(),
-//                ""+tareaSubordinado.getId(), "b", "t", "Realiza"));
+                relations.add(new InfoRelacionDTO(iterator, ""+subordinado.getId(),
+                        ""+tareaSubordinado.getId(), "b", "t", "Realiza"));
+                iterator++;
             }
         }
-
 
         TareaNode tareaInicial = tareaRepository.tareaInicialByObjetivoId(objetivoId);
         Optional<TareaNode> tareaInico = tareaRepository.findById(tareaInicial.getId());
@@ -58,7 +60,8 @@ public class TareasServiceImpl implements TareasService {
         while (indicator!=1){
             nodes.add(new InfoNodoDTO(""+tareaActual.getId(), tareaActual.getNombre(), "lightgreen", tareaActual.getEstado()));
             if(tareaActual.getTareasContigua().size()!=0){
-                relations.add(new InfoRelacionDTO(tareaActual.getId(), ""+tareaActual.getId(), ""+tareaActual.getTareasContigua().get(0).getId(), "b", "t", "continua"));
+                relations.add(new InfoRelacionDTO(tareaActual.getId(), ""+tareaActual.getId(),
+                        ""+tareaActual.getTareasContigua().get(0).getId(), "b", "t", "continua"));
                 tareaActual= tareaActual.getTareasContigua().get(0);
             }else{
                 indicator = 1;
@@ -67,6 +70,7 @@ public class TareasServiceImpl implements TareasService {
         infoGrafoDTO.setNodes(nodes);
         infoGrafoDTO.setRelations(relations);
         //Optional<TareaNode> tareaCompleta = tareaRepository.findById(tareaInicial.getId());
+
         return infoGrafoDTO;
     }
 
