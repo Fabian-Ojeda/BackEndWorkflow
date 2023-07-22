@@ -47,7 +47,7 @@ public class TareasServiceImpl implements TareasService {
             List<TareaNode> tareasAsociadas = tareaRepository.tareasByRealizadorIdAndObjetivoID(subordinado.getId(), objetivoId);
             for (TareaNode tareaSubordinado: tareasAsociadas) {
                 relations.add(new InfoRelacionDTO(iterator, ""+subordinado.getId(),
-                        ""+tareaSubordinado.getId(), "b", "t", "Realiza"));
+                        ""+tareaSubordinado.getId(), "b", "t", "realiza"));
                 iterator++;
             }
         }
@@ -77,40 +77,46 @@ public class TareasServiceImpl implements TareasService {
     @Override
     public ResponseDTO guardarTareasPorObjetivo(TareasByObjetivoDTO tareasByObjetivoDTO) {
         ResponseDTO responseDTO = new ResponseDTO();
+        //------Primero se separan las tareas de las personas en la información que llega----------//
+        List<InfoNodoDTO> tareas = tareasByObjetivoDTO.getNodes().stream().filter(nodo -> nodo.getColor().equals("lightgreen")).collect(Collectors.toList());
 
         //-----------------------------Tareas a eliminar---------------------------------------//
         List<TareaNode> tareasExistentesPorObjetivo = tareaRepository.tareasByObjetivoId(tareasByObjetivoDTO.getIdObjetivo());
         List<TareaNode> tareasAEliminar = tareasExistentesPorObjetivo.stream()
-                .filter(tarea -> tareasByObjetivoDTO.getNodes().stream()
+                .filter(tarea -> tareas.stream()
                         .noneMatch(node -> Long.parseLong(node.getId())==(tarea.getId()))).collect(Collectors.toList());
         for (TareaNode tareaIterator: tareasAEliminar) {
             tareaRepository.borrarTarea(tareaIterator.getId());
         }
-        //-----------------------------------------------------------------------------------//
 
         //-----recorro las tareas entrantes para el proceso de actualización, si alguna no se encuantra sera creada despues----//
         List<InfoNodoDTO> tareasNuevas = new ArrayList<>();
-        for (InfoNodoDTO infoIterator: tareasByObjetivoDTO.getNodes()) {
+        for (InfoNodoDTO infoIterator: tareas) {
             Optional<TareaNode> tareaTemp = tareaRepository.actualizarTarea(Long.valueOf(infoIterator.getId()), infoIterator.getText(), "sin finalizar");
             if( tareaTemp.isEmpty() ){
                 tareasNuevas.add(infoIterator);
             }
         }
-        //-----------------------------------------------------------------------------------------------//
 
         //----------------------------guardamos las tareas nuevas----------------------------------------//
         for (InfoNodoDTO infoIterator: tareasNuevas) {
-            if(!infoIterator.getColor().equals("yellow")) {
-                saveTarea(infoIterator, tareasByObjetivoDTO.getRelations(), tareasByObjetivoDTO.getIdObjetivo());
-            }
+            saveTarea(infoIterator, tareasByObjetivoDTO.getRelations(), tareasByObjetivoDTO.getIdObjetivo());
         }
-        //-----------------------------------------------------------------------------------------------//
 
-        //-----------------------------------Analizar las relaciones-------------------------------------//
-        for (InfoRelacionDTO infoRelationIterator : tareasByObjetivoDTO.getRelations()) {
+        /*----------------------------Se deben extraer unicamente las relaciones de "continua" para que
+        ------------------------------------sean analizadas con las tareas-------------------------------*/
+        List<InfoRelacionDTO> relationsTareas = tareasByObjetivoDTO.getRelations().stream().filter(relation -> relation.getText().equals("continua")).collect(Collectors.toList());
+
+        //-----------------------------------vincular las relaciones de tareas-------------------------------------//
+        for (InfoRelacionDTO infoRelationIterator : relationsTareas) {
             tareaRepository.vincularTareas(Long.parseLong(infoRelationIterator.getFrom()), Long.parseLong(infoRelationIterator.getTo()));
         }
-        //-----------------------------------------------------------------------------------------------//
+        //--------Se toman las relaciones de vincular las personas con las tareas que deben hacer --------------------//
+        List<InfoRelacionDTO> relationsPersonaTarea = tareasByObjetivoDTO.getRelations().stream().filter(relation -> relation.getText().equals("realiza")).collect(Collectors.toList());
+
+        for (InfoRelacionDTO infoRelationIterator : relationsPersonaTarea) {
+            tareaRepository.vincularPersonaConTareas(Long.parseLong(infoRelationIterator.getFrom()), Long.parseLong(infoRelationIterator.getTo()));
+        }
 
         responseDTO.setError(false);
         responseDTO.setDescription("Guardado correcto de data");

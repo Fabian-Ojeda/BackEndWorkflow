@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface PersonaRepository extends Neo4jRepository<PersonaNode, Long> {
-    //@Query("MATCH (p:Person) RETURN p")
     List<PersonaNode> findAll();
     PersonaNode findByNombres(String nombres);
     @Query("MATCH (p:Person)-[r]-() WHERE ID(p) = $id DELETE p, r")
@@ -18,5 +17,4 @@ public interface PersonaRepository extends Neo4jRepository<PersonaNode, Long> {
 
     @Query("MATCH (j:Person)-[:LIDERA]->(s:Person) WHERE ID(j) = $jefeId RETURN s")
     List<PersonaNode> consultarSubordinadosByJefeId(@Param("jefeId") Long jefeId);
-
 }

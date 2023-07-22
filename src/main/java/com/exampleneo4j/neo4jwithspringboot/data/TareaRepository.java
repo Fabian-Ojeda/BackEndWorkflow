@@ -20,6 +20,8 @@ public interface TareaRepository extends Neo4jRepository<TareaNode, Long> {
 
     @Query("MATCH (t:Tarea) WHERE ID(t) = $from MATCH (s:Tarea) WHERE ID(s) = $to MERGE (t)-[:CONTINUA]->(s) RETURN t")
     Optional<TareaNode> vincularTareas(@Param("from") Long from, @Param("to") Long to);
+    @Query("MATCH (p:Person) WHERE ID(p) = $from MATCH (t:Tarea) WHERE ID(t) = $to MERGE (p)-[:REALIZA]->(t) RETURN t")
+    Optional<TareaNode> vincularPersonaConTareas(@Param("from") Long from, @Param("to") Long to);
 
     @Query("MATCH (t:Tarea) WHERE ID(t) = $tareaId DETACH DELETE t")
     void borrarTarea(@Param("tareaId") Long tareaId);
