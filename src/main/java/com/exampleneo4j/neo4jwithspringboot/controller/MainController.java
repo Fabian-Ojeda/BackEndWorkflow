@@ -1,6 +1,7 @@
 package com.exampleneo4j.neo4jwithspringboot.controller;
 
 import com.exampleneo4j.neo4jwithspringboot.dto.*;
+import com.exampleneo4j.neo4jwithspringboot.exception.NotFoundException;
 import com.exampleneo4j.neo4jwithspringboot.service.ObjetivosService;
 import com.exampleneo4j.neo4jwithspringboot.service.PersonaService;
 import com.exampleneo4j.neo4jwithspringboot.service.TareasService;
@@ -49,7 +50,7 @@ public class MainController {
     }
 
     @GetMapping(value="/obtenerObjetivosPorCreador", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<InfoPersonaNodosDTO> obtenerObjetivosPorCreador(@RequestParam("personaId") Long personaId){
+    public ResponseEntity<ResponseDTO<InfoPersonaNodosDTO>> obtenerObjetivosPorCreador(@RequestParam("personaId") Long personaId) throws NotFoundException {
         return new ResponseEntity<>(objetivosService.listaObjetivosPorCreador(personaId), HttpStatus.OK);
     }
     @PostMapping(value="/obtenerTareasPorObjetivo", produces = MediaType.APPLICATION_JSON_VALUE)
